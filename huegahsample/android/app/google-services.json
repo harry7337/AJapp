@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "995104522422",
+    "project_id": "huegah-154aa",
+    "storage_bucket": "huegah-154aa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:995104522422:android:2ca6b4308b237e1a002617",
+        "android_client_info": {
+          "package_name": "com.huegah.huegahsample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "995104522422-f6fgsi4rds11fi7kmdjjj3dmgdsmb8en.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGRzrQEA1t1a1UNZ2puyI8cxuggGmjemo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "995104522422-f6fgsi4rds11fi7kmdjjj3dmgdsmb8en.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
