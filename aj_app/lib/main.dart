@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
 import '/screen/wrapper.dart';
 
@@ -13,9 +14,12 @@ void main() async {
     ],
   );
   await Firebase.initializeApp();
+  await AndroidAlarmManager.initialize();
+
   runApp(MyApp());
 }
 
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -27,7 +31,8 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.amber,
           fontFamily: 'Quicksand',
           textTheme: ThemeData.light().textTheme.copyWith(
-                headline6: TextStyle(fontFamily: 'Opensans', fontSize: 18),
+                headline6:
+                    const TextStyle(fontFamily: 'Opensans', fontSize: 18),
               ),
           buttonColor: Colors.white),
     );
