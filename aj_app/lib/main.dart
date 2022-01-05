@@ -27,7 +27,8 @@ class MyApp extends StatelessWidget {
           accentColor: Colors.amber,
           fontFamily: 'Quicksand',
           textTheme: ThemeData.light().textTheme.copyWith(
-                headline6: TextStyle(fontFamily: 'Opensans', fontSize: 18),
+                headline6:
+                    const TextStyle(fontFamily: 'Opensans', fontSize: 18),
               ),
           buttonColor: Colors.white),
     );
