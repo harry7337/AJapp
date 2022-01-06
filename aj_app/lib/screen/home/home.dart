@@ -11,6 +11,7 @@ import '/shared/loading.dart';
 
 import '/screen/wrapper.dart';
 import '/services/auth.dart';
+import '/services/alarm.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -38,6 +39,7 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  //record video methos
   void _onImageButtonPressed(ImageSource source) async {
     final XFile? recordedVideo = (await _picker.pickVideo(
         source: source,
@@ -59,6 +61,28 @@ class _HomeState extends State<Home> {
     }
   }
 
+  //alert dialog when retaking a video
+  Widget _confirmRetakeDialog() {
+    return AlertDialog(
+      title: const Text('Are you sure you want to retake this video?'),
+      actions: [
+        // ignore: deprecated_member_use
+        FlatButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        // ignore: deprecated_member_use
+        FlatButton(
+          onPressed: () => videoPlayerController!
+              .dispose()
+              .then((_) => Navigator.pop(context)),
+          child: const Text('Ok'),
+        ),
+      ],
+    );
+  }
+
+  //app drawer
   Widget drawerHead() {
     return DrawerHeader(
       margin: const EdgeInsets.only(bottom: 8),
@@ -158,13 +182,19 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              body: videoPlayerController != null
-                  ? Container(
+              body: 
+                   Container(
                       margin: const EdgeInsets.all(200),
                       decoration: BoxDecoration(
                           border: Border.all(color: Colors.white)),
                       child: Column(
                         children: [
+                          Center(
+                          child: Alarm(),
+                          ),
+                          if(videoPlayerController != null)
+                          Column(
+                          children:[
                           //video player screen view
                           GestureDetector(
                             onTap: () {
@@ -192,9 +222,11 @@ class _HomeState extends State<Home> {
                             onPressed: () {},
                             icon: const Icon(Icons.upload),
                           )
+                          ],
+                          ),
                         ],
-                      ))
-                  : const Text(''),
+                      ),),
+                  
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Colors.red,
                 onPressed: () {
@@ -214,26 +246,7 @@ class _HomeState extends State<Home> {
           );
   }
 
-  _confirmRetakeDialog() {
-    return AlertDialog(
-      title: const Text('Are you sure you want to retake this video?'),
-      actions: [
-        // ignore: deprecated_member_use
-        FlatButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        // ignore: deprecated_member_use
-        FlatButton(
-          onPressed: () => videoPlayerController!
-              .dispose()
-              .then((_) => Navigator.pop(context)),
-          child: const Text('Ok'),
-        ),
-      ],
-    );
-  }
-
+  //controls pause and play for video
   void pauseAndPlay(int count) {
     if (count % 2 != 0) {
       videoPlayerController!.pause();
