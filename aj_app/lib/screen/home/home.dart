@@ -180,67 +180,68 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+    print("Width:${screenSize.width}");
+    print("Height:${screenSize.height}");
+
     return loading
         ? Loading()
         : WillPopScope(
             onWillPop: () async => false,
             child: Scaffold(
               appBar: AppBar(
-                title: const Text('AJ Hospital'),
+                title: const Text('AJ Reminders'),
                 centerTitle: true,
                 backgroundColor: Theme.of(context).primaryColor,
                 elevation: 20,
               ),
               drawer: drawerWidget(),
               body: Container(
-                margin: const EdgeInsets.all(200),
                 decoration:
                     BoxDecoration(border: Border.all(color: Colors.white)),
                 child: Column(
                   children: [
-                    Center(
-                      child: SizedBox(
-                        height: 110,
+                    SizedBox(
+                      width: screenSize.width,
+                      height: screenSize.height / 5,
+                      child: FittedBox(
+                        fit: BoxFit.cover,
                         child: AlarmPage(),
                       ),
                     ),
                     if (videoPlayerController != null)
-                      Container(
-                        height: 600,
-                        child: Column(
-                          children: [
-                            //video player screen view
-                            GestureDetector(
-                              onTap: () {
-                                count++;
-                                pauseAndPlay(count);
-                              },
-                              child: Container(
-                                  height: 500,
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(20),
-                                  child: (videoPlayerController != null)
-                                      ? (videoPlayerController!
-                                              .value.isInitialized
-                                          ? AspectRatio(
-                                              aspectRatio:
-                                                  videoPlayerController!
-                                                      .value.aspectRatio,
-                                              child: VideoPlayer(
-                                                  videoPlayerController!))
-                                          : Container())
-                                      : const Text('')),
+                      Column(
+                        children: [
+                          //video player screen view
+                          GestureDetector(
+                            onTap: () {
+                              count++;
+                              pauseAndPlay(count);
+                            },
+                            child: Container(
+                              // height: boxconstraints.maxHeight,
+                              padding: const EdgeInsets.all(20),
+                              child: (videoPlayerController != null)
+                                  ? (videoPlayerController!.value.isInitialized
+                                      ? AspectRatio(
+                                          aspectRatio: videoPlayerController!
+                                              .value.aspectRatio,
+                                          child: VideoPlayer(
+                                              videoPlayerController!),
+                                        )
+                                      : Text('Error video not initialized'))
+                                  : const Text('Error'),
                             ),
+                          ),
 
-                            //upload button
-                            IconButton(
-                              onPressed: _enable ? _upload : null,
-                              icon: const Icon(Icons.upload),
-                              iconSize: 30,
-                              color: Colors.blue,
-                            )
-                          ],
-                        ),
+                          //upload button
+                          IconButton(
+                            onPressed: _enable ? _upload : null,
+                            icon: const Icon(Icons.upload),
+                            iconSize: 30,
+                            color: Colors.blue,
+                          )
+                        ],
                       ),
                   ],
                 ),

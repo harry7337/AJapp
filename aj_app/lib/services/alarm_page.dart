@@ -173,7 +173,7 @@ class _AlarmPageState extends State<AlarmPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("build");
+    var screen = MediaQuery.of(context);
     return Card(
       child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -182,17 +182,16 @@ class _AlarmPageState extends State<AlarmPage> {
             children: [
               Text(
                 'Your next reminder is ${isTimeUp() ? 'Now!' : 'in:'}',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
               ),
               const Padding(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.all(5),
               ),
               CountdownTimer(
                 controller: timerController,
                 endWidget: showEndWidget,
-                textStyle: const TextStyle(
-                  fontSize: 25,
+                textStyle: TextStyle(
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                 ),
               ),
