@@ -1,17 +1,22 @@
 import 'dart:io';
 
+import 'package:aj_app/screen/congrats.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:aj_app/screen/account_info/account_info.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
 
 import '/shared/loading.dart';
 
 import '/screen/wrapper.dart';
 import '/services/auth.dart';
-import '/services/alarm.dart';
+import '../../services/alarm_page.dart';
+import '/services/update_doc.dart';
+
+final userPath = FirebaseAuth.instance.currentUser!.uid;
 
 class Home extends StatefulWidget {
   @override
@@ -19,24 +24,83 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final AuthService _auth = AuthService();
-  final DateTime today = DateTime.now();
+  final _auth = AuthService();
+
+  final today = DateTime.now();
   final firestore = FirebaseFirestore.instance;
   final email = FirebaseAuth.instance.currentUser!.email;
   final phoneNo = FirebaseAuth.instance.currentUser!.phoneNumber;
   final userUID = FirebaseAuth.instance.currentUser!.uid;
-  final ImagePicker _picker = ImagePicker();
+  final _picker = ImagePicker();
+  File? videoFile;
   int count = 0;
   VideoPlayerController? videoPlayerController;
   // late String videoPath;
 
   bool loading = false;
   dynamic result;
-  bool admin = false;
+  bool _enable = false;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  Widget drawerWidget() {
+    return Drawer(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //Drawer Head
+          drawerHead(),
+
+          //Contact us
+          ListTile(
+            onTap: () {},
+            leading: const Icon(
+              Icons.contact_support_outlined,
+            ),
+            title: const Text('Contact Us'),
+          ),
+          //Account Info
+          ListTile(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => AccountInfo(),
+              ),
+            ),
+            leading: const Icon(
+              Icons.account_circle_sharp,
+            ),
+            title: const Text('Account'),
+          ),
+          //About Us
+          ListTile(
+            onTap: () {},
+            leading: const Icon(
+              Icons.info_outline,
+            ),
+            title: const Text('About Us'),
+          ),
+          //Logout
+          ListTile(
+            onTap: () async {
+              await _auth.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => Wrapper(),
+                ),
+                (route) => false,
+              );
+            },
+            leading: const Icon(Icons.logout),
+            title: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
   }
 
   //record video methos
@@ -56,8 +120,10 @@ class _HomeState extends State<Home> {
               videoPlayerController!.play(); //.pause() for pausing
               videoPlayerController!.setVolume(0.0);
             });
-
-      setState(() {});
+      videoFile = new File(recordedVideo.path);
+      setState(() {
+        _enableUpload();
+      });
     }
   }
 
@@ -73,9 +139,13 @@ class _HomeState extends State<Home> {
         ),
         // ignore: deprecated_member_use
         FlatButton(
-          onPressed: () => videoPlayerController!
-              .dispose()
-              .then((_) => Navigator.pop(context)),
+          onPressed: () {
+            videoPlayerController!.dispose().then((_) {
+              Navigator.pop(context);
+              videoPlayerController = null;
+              _onImageButtonPressed(ImageSource.camera);
+            });
+          },
           child: const Text('Ok'),
         ),
       ],
@@ -121,112 +191,60 @@ class _HomeState extends State<Home> {
                 backgroundColor: Theme.of(context).primaryColor,
                 elevation: 20,
               ),
-              drawer: Drawer(
+              drawer: drawerWidget(),
+              body: Container(
+                margin: const EdgeInsets.all(200),
+                decoration:
+                    BoxDecoration(border: Border.all(color: Colors.white)),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    //Drawer Head
-                    drawerHead(),
+                    Center(
+                      child: SizedBox(
+                        height: 110,
+                        child: AlarmPage(),
+                      ),
+                    ),
+                    if (videoPlayerController != null)
+                      Container(
+                        height: 600,
+                        child: Column(
+                          children: [
+                            //video player screen view
+                            GestureDetector(
+                              onTap: () {
+                                count++;
+                                pauseAndPlay(count);
+                              },
+                              child: Container(
+                                  height: 500,
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
+                                  child: (videoPlayerController != null)
+                                      ? (videoPlayerController!
+                                              .value.isInitialized
+                                          ? AspectRatio(
+                                              aspectRatio:
+                                                  videoPlayerController!
+                                                      .value.aspectRatio,
+                                              child: VideoPlayer(
+                                                  videoPlayerController!))
+                                          : Container())
+                                      : const Text('')),
+                            ),
 
-                    //Bookings
-                    ListTile(
-                        title: const Text(
-                          'Bookings',
-                        ),
-                        leading: const Icon(Icons.assignment_sharp),
-                        onTap: () {}),
-                    //Contact us
-                    ListTile(
-                      onTap: () {},
-                      leading: const Icon(
-                        Icons.contact_support_outlined,
-                      ),
-                      title: const Text('Contact Us'),
-                    ),
-                    //Account Info
-                    ListTile(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => AccountInfo(),
+                            //upload button
+                            IconButton(
+                              onPressed: _enable ? _upload : null,
+                              icon: const Icon(Icons.upload),
+                              iconSize: 30,
+                              color: Colors.blue,
+                            )
+                          ],
                         ),
                       ),
-                      leading: const Icon(
-                        Icons.account_circle_sharp,
-                      ),
-                      title: const Text('Account'),
-                    ),
-                    //About Us
-                    ListTile(
-                      onTap: () {},
-                      leading: const Icon(
-                        Icons.info_outline,
-                      ),
-                      title: const Text('About Us'),
-                    ),
-                    //Logout
-                    ListTile(
-                      onTap: () async {
-                        await _auth.signOut();
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => Wrapper(),
-                          ),
-                          (route) => false,
-                        );
-                      },
-                      leading: const Icon(Icons.logout),
-                      title: const Text('Logout'),
-                    ),
                   ],
                 ),
               ),
-              body: 
-                   Container(
-                      margin: const EdgeInsets.all(200),
-                      decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white)),
-                      child: Column(
-                        children: [
-                          Center(
-                          child: Alarm(),
-                          ),
-                          if(videoPlayerController != null)
-                          Column(
-                          children:[
-                          //video player screen view
-                          GestureDetector(
-                            onTap: () {
-                              count++;
-                              pauseAndPlay(count);
-                            },
-                            child: Container(
-                                height: 500,
-                                width: double.infinity,
-                                padding: const EdgeInsets.all(20),
-                                child: (videoPlayerController != null)
-                                    ? (videoPlayerController!
-                                            .value.isInitialized
-                                        ? AspectRatio(
-                                            aspectRatio: videoPlayerController!
-                                                .value.aspectRatio,
-                                            child: VideoPlayer(
-                                                videoPlayerController!))
-                                        : Container())
-                                    : const Text('')),
-                          ),
-
-                          //upload button
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(Icons.upload),
-                          )
-                          ],
-                          ),
-                        ],
-                      ),),
-                  
               floatingActionButton: FloatingActionButton(
                 backgroundColor: Colors.red,
                 onPressed: () {
@@ -241,7 +259,7 @@ class _HomeState extends State<Home> {
                 child: const Icon(Icons.videocam),
               ),
               floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerDocked,
+                  FloatingActionButtonLocation.centerFloat,
             ),
           );
   }
@@ -253,5 +271,36 @@ class _HomeState extends State<Home> {
     } else {
       videoPlayerController!.play();
     }
+  }
+
+  void _upload() async {
+    final datePath = DateFormat.yMMMMd('en_US').format(DateTime.now());
+    final timePath = DateFormat.j().format(DateTime.now().add(nextReminder!));
+    final _upDoc =
+        UpdateDoc(timePath: timePath, datePath: datePath, userPath: userPath);
+
+    await _upDoc.updateDoc(videoFile!).then((value) {
+      AlarmPage.onUploadSucess();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => UploadFinish(),
+        ),
+      );
+    });
+  }
+
+  void _enableUpload() async {
+    var time = await getTime();
+    time.forEach((element) {
+      var reminder = element.keys.first;
+      var isCompleted = element.values.first;
+      if (DateTime.now().isAfter(reminder) &&
+          DateTime.now().isBefore(reminder.add(timeout))) {
+        setState(() {
+          _enable = isCompleted;
+        });
+      }
+    });
   }
 }

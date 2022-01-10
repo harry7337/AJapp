@@ -24,13 +24,11 @@ class AuthService {
 
   //update roles firestore
   void userPrivileges(User user) async {
-    // final roles = firestore.collection("users").doc(user.uid);
-    // if (!(await roles.get()).exists) {
-    //   roles.set({
-    //     'roles': {'isAdmin': false}
-    //   });
-    //   print('Doc set');
-    // }
+    final videoPaths = firestore.collection("jaw_movements").doc(user.uid);
+    if (!(await videoPaths.get()).exists) {
+      videoPaths.set({'video_paths': {}});
+      print('Doc set');
+    }
   }
 
   //sign in with phone credential

@@ -1,103 +1,63 @@
+import 'dart:io';
+
+import 'package:aj_app/services/upload_video.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 class UpdateDoc {
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  static final userDoc = FirebaseFirestore.instance
+      .collection('jaw_movements')
+      .doc(FirebaseAuth.instance.currentUser!.uid);
+  final String timePath;
+  final String datePath;
+  final String userPath;
+  late UploadVideo upVid;
 
-  Future<void> updateDoc(DateTime selectedDate) {
-    final appointments = firestore
-        .collection('event_1')
-        .doc('hourly')
-        .collection('appointments');
+  UpdateDoc({
+    required this.timePath,
+    required this.datePath,
+    required this.userPath,
+  }) {
+    this.upVid = new UploadVideo(
+        timePath: timePath, datePath: datePath, userPath: userPath);
+  }
 
-    return appointments.doc('available_slots').update(
-      {
-        '${DateFormat.yMMMd().format(selectedDate)}': {
-          'slot_1': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  9, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  10, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_2': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  10, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  11, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_3': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  11, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  12, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_4': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  12, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  13, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_5': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  13, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  14, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_6': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  14, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  15, 0, 0),
-            ),
-            'booking_status': false,
-          },
-          
-          'slot_7': {
-            'start_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  15, 0, 0),
-            ),
-            'end_time': Timestamp.fromDate(
-              DateTime(selectedDate.year, selectedDate.month, selectedDate.day,
-                  16, 0, 0),
-            ),
-            'booking_status': false,
-          },
-        },
-      },
-    );
+  Future<void> updateDoc(File videoFile) async {
+    final videoPath = userPath + '_' + timePath;
+    Map<String, Object> updatedValue = {};
+    updatedValue['video_paths.${datePath}.${timePath}'] = videoPath;
+    this
+        .upVid
+        .uploadFile(videoFile)
+        .whenComplete(() => userDoc.update(updatedValue));
+  }
+
+  static Future<DocumentSnapshot<Map<String, dynamic>>>
+      getUploadedStatusFromDatabase() {
+    return userDoc.get();
+  }
+
+  static Future<List> getReminders() async {
+    final now = DateTime.now();
+    var times = await FirebaseFirestore.instance
+        .collection('jaw_movements')
+        .doc('reminders')
+        .get();
+    List reminders = times.data()!['times'];
+    List<Map<DateTime, bool>> finalList = [];
+    reminders.forEach((element) {
+      Timestamp timestamp = element;
+      finalList.add({
+        DateTime(
+            now.year,
+            now.month,
+            now.day,
+            DateTime.fromMillisecondsSinceEpoch(
+                    timestamp.millisecondsSinceEpoch)
+                .hour): false
+      });
+    });
+    return finalList;
   }
 }
