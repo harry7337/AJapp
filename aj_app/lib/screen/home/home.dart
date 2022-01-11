@@ -107,7 +107,7 @@ class _HomeState extends State<Home> {
   void _onImageButtonPressed(ImageSource source) async {
     final XFile? recordedVideo = (await _picker.pickVideo(
         source: source,
-        maxDuration: const Duration(seconds: 20),
+        maxDuration: const Duration(seconds: 500),
         preferredCameraDevice: CameraDevice.front));
     if (recordedVideo != null && recordedVideo.path != null) {
       // _pickVideo = recordedVideo;

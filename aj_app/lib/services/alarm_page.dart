@@ -10,7 +10,7 @@ import '../main.dart';
 
 bool isRunning = true;
 final _refreshRate = Duration(seconds: 5);
-final timeout = Duration(hours: 0, minutes: 5);
+final timeout = Duration(hours: 0, minutes: 10);
 // final time = [
 //   {
 //     DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 11,
@@ -62,7 +62,7 @@ class _AlarmPageState extends State<AlarmPage> {
     return Text(
       'Practice your Movements!',
       style: TextStyle(
-        fontSize: 25,
+        fontSize: 8,
         fontWeight: FontWeight.bold,
         color: Colors.redAccent,
       ),
