@@ -25,7 +25,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final _auth = AuthService();
-
   final today = DateTime.now();
   final firestore = FirebaseFirestore.instance;
   final email = FirebaseAuth.instance.currentUser!.email;
@@ -38,7 +37,6 @@ class _HomeState extends State<Home> {
   // late String videoPath;
 
   bool loading = false;
-  dynamic result;
   bool _enable = false;
 
   @override
@@ -64,12 +62,7 @@ class _HomeState extends State<Home> {
           ),
           //Account Info
           ListTile(
-            onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AccountInfo(),
-              ),
-            ),
+            onTap: () {},
             leading: const Icon(
               Icons.account_circle_sharp,
             ),
@@ -199,51 +192,54 @@ class _HomeState extends State<Home> {
               body: Container(
                 decoration:
                     BoxDecoration(border: Border.all(color: Colors.white)),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      width: screenSize.width,
-                      height: screenSize.height / 5,
-                      child: FittedBox(
-                        fit: BoxFit.cover,
-                        child: AlarmPage(),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: screenSize.width,
+                        height: screenSize.height / 5,
+                        child: FittedBox(
+                          fit: BoxFit.cover,
+                          child: AlarmPage(),
+                        ),
                       ),
-                    ),
-                    if (videoPlayerController != null)
-                      Column(
-                        children: [
-                          //video player screen view
-                          GestureDetector(
-                            onTap: () {
-                              count++;
-                              pauseAndPlay(count);
-                            },
-                            child: Container(
-                              // height: boxconstraints.maxHeight,
-                              padding: const EdgeInsets.all(20),
-                              child: (videoPlayerController != null)
-                                  ? (videoPlayerController!.value.isInitialized
-                                      ? AspectRatio(
-                                          aspectRatio: videoPlayerController!
-                                              .value.aspectRatio,
-                                          child: VideoPlayer(
-                                              videoPlayerController!),
-                                        )
-                                      : Text('Error video not initialized'))
-                                  : const Text('Error'),
+                      if (videoPlayerController != null)
+                        Column(
+                          children: [
+                            //video player screen view
+                            GestureDetector(
+                              onTap: () {
+                                count++;
+                                pauseAndPlay(count);
+                              },
+                              child: Container(
+                                // height: boxconstraints.maxHeight,
+                                padding: const EdgeInsets.all(20),
+                                child: (videoPlayerController != null)
+                                    ? (videoPlayerController!
+                                            .value.isInitialized
+                                        ? AspectRatio(
+                                            aspectRatio: videoPlayerController!
+                                                .value.aspectRatio,
+                                            child: VideoPlayer(
+                                                videoPlayerController!),
+                                          )
+                                        : Text('Error video not initialized'))
+                                    : const Text('Error'),
+                              ),
                             ),
-                          ),
 
-                          //upload button
-                          IconButton(
-                            onPressed: _enable ? _upload : null,
-                            icon: const Icon(Icons.upload),
-                            iconSize: 30,
-                            color: Colors.blue,
-                          )
-                        ],
-                      ),
-                  ],
+                            //upload button
+                            IconButton(
+                              onPressed: _enable ? _upload : null,
+                              icon: const Icon(Icons.upload),
+                              iconSize: 30,
+                              color: Colors.blue,
+                            )
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
               ),
               floatingActionButton: FloatingActionButton(
@@ -260,7 +256,7 @@ class _HomeState extends State<Home> {
                 child: const Icon(Icons.videocam),
               ),
               floatingActionButtonLocation:
-                  FloatingActionButtonLocation.centerFloat,
+                  FloatingActionButtonLocation.startFloat,
             ),
           );
   }
@@ -275,13 +271,27 @@ class _HomeState extends State<Home> {
   }
 
   void _upload() async {
+    showModalBottomSheet(
+        context: context,
+        builder: (builder) {
+          return Row(
+            children: [
+              Loading(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5),
+              ),
+              const Text('Uploading...'),
+            ],
+          );
+        },
+        isDismissible: false);
     final datePath = DateFormat.yMMMMd('en_US').format(DateTime.now());
     final timePath = DateFormat.j().format(DateTime.now().add(nextReminder!));
     final _upDoc =
         UpdateDoc(timePath: timePath, datePath: datePath, userPath: userPath);
-
     await _upDoc.updateDoc(videoFile!).then((value) {
       AlarmPage.onUploadSucess();
+      Navigator.pop(context);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -299,7 +309,7 @@ class _HomeState extends State<Home> {
       if (DateTime.now().isAfter(reminder) &&
           DateTime.now().isBefore(reminder.add(timeout))) {
         setState(() {
-          _enable = isCompleted;
+          _enable = !isCompleted;
         });
       }
     });
