@@ -62,7 +62,7 @@ class _AlarmPageState extends State<AlarmPage> {
     return Text(
       'Practice your Movements!',
       style: TextStyle(
-        fontSize: 25,
+        fontSize: 8,
         fontWeight: FontWeight.bold,
         color: Colors.redAccent,
       ),
