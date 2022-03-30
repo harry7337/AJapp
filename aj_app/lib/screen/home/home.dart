@@ -1,3 +1,5 @@
+
+
 import 'dart:io';
 
 import 'package:aj_app/screen/congrats.dart';
@@ -8,6 +10,7 @@ import 'package:aj_app/screen/account_info/account_info.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:video_player/video_player.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '/shared/loading.dart';
 
@@ -97,6 +100,19 @@ class _HomeState extends State<Home> {
             },
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
+          ),
+          ListTile(
+            onTap: () async {
+              if (await canLaunch('youtube://www.youtube.com/watch?v=xtKvHBGx0VM')) {
+                await launch('youtube://www.youtube.com/watch?v=xtKvHBGx0VM', forceSafariVC: false);
+              } else {
+                if (await canLaunch('https://www.youtube.com/watch?v=xtKvHBGx0VM')) {
+                  await launch('https://www.youtube.com/watch?v=xtKvHBGx0VM');
+                }
+              }
+            },
+            leading: const Icon(IconData(0xe457, fontFamily: 'MaterialIcons')),
+            title: const Text('Tutorials'),
           ),
         ],
       ),
