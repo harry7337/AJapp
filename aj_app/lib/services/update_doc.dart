@@ -55,7 +55,10 @@ class UpdateDoc {
             now.day,
             DateTime.fromMillisecondsSinceEpoch(
                     timestamp.millisecondsSinceEpoch)
-                .hour): false
+                .hour,
+            DateTime.fromMillisecondsSinceEpoch(
+                    timestamp.millisecondsSinceEpoch)
+                .minute): false
       });
     });
     return finalList;

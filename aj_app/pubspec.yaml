@@ -57,6 +57,10 @@ dependencies:
   firebase_storage: ^10.2.4
   firebase_auth: ^3.2.0
   google_sign_in: ^5.2.1
+
+  firebase_ml_custom: ^0.2.0+3
+  tflite_flutter: ^0.9.0
+
   # android_alarm_manager_plus: ^2.0.3
 
 
